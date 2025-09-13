@@ -1,0 +1,77 @@
+{
+  "name": "devi-rce",
+  "version": "1.0.0",
+  "description": "A powerful Rich Content Editor component for React applications",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "shx rm -rf dist",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "react",
+    "rich-text-editor",
+    "wysiwyg",
+    "tiptap",
+    "editor",
+    "content-editor",
+    "typescript",
+    "component",
+    "ui",
+    "text-formatting"
+  ],
+  "author": {
+    "name": "Akash Kumar Singh",
+    "email": "webakash1806@gmail.com",
+    "url": "https://github.com/webakash1806"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webakash1806/devi-extra-package.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webakash1806/devi-extra-package/issues"
+  },
+  "homepage": "https://github.com/webakash1806/devi-extra-package#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/node": "^22.13.10",
+    "shx": "^0.4.0",
+    "typescript": "^5.8.2",
+    "react": "^18.2.0"
+  },
+  "dependencies": {
+    "@tiptap/react": "^2.1.0",
+    "@tiptap/starter-kit": "^2.1.0",
+    "@tiptap/extension-underline": "^2.1.0",
+    "@tiptap/extension-text-align": "^2.1.0",
+    "@tiptap/extension-link": "^2.1.0",
+    "@tiptap/extension-image": "^2.1.0",
+    "@tiptap/extension-table": "^2.1.0",
+    "@tiptap/extension-table-row": "^2.1.0",
+    "@tiptap/extension-table-cell": "^2.1.0",
+    "@tiptap/extension-table-header": "^2.1.0",
+    "@tiptap/extension-text-style": "^2.1.0",
+    "@tiptap/extension-color": "^2.1.0",
+    "@tiptap/extension-highlight": "^2.1.0",
+    "@tiptap/extension-font-family": "^2.1.0",
+    "lucide-react": "^0.263.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  }
+}
