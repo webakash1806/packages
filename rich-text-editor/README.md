@@ -1,212 +1,358 @@
-# Professional Rich Text Editor (RCE)
+# 🚀 Devi Rich Text Editors
 
-A modern, feature-rich, and completely redesigned React rich text editor built with TipTap, designed for professional content creation with a beautiful UI and extensive functionality.
+**Professional-grade rich text editors for React applications**
 
-## ✨ What's New - Complete Professional Redesign
+[![npm version](https://badge.fury.io/js/devi-rce.svg)](https://badge.fury.io/js/devi-rce)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](https://www.typescriptlang.org/)
 
-This editor has been completely transformed from a basic implementation to a **professional-grade rich text editor** with:
+A comprehensive collection of rich text editors built with React and TipTap, offering everything from simple text editing to advanced Notion-like functionality.
 
-### 🎨 **Modern Design System**
-- **Professional UI/UX** - Clean, modern interface inspired by leading text editors
-- **Dark/Light Theme Support** - Seamless theme switching with proper contrast
-- **Responsive Design** - Works perfectly on desktop, tablet, and mobile devices
-- **Accessibility First** - Full keyboard navigation and screen reader support
-- **CSS Variables** - Extensive theming system with customizable color palettes
+## ✨ Features
 
-### 🚀 **Enhanced Features**
-- **Bubble Menu** - Context-sensitive formatting toolbar that appears when text is selected
-- **Floating Menu** - Insert menu that appears on empty lines for quick content addition
-- **Professional Modals** - Beautiful dialogs for links, images, and tables with advanced options
-- **Character Counter** - Real-time character counting with visual warnings
-- **Fullscreen Mode** - Distraction-free editing experience
-- **Keyboard Shortcuts** - Full keyboard shortcut support (Ctrl+B, Ctrl+I, etc.)
+### 🎯 **DeviBasicEditor** - Simple & Clean
+- Essential text formatting (bold, italic, underline, strikethrough)
+- Headings (H1, H2, H3)
+- Lists and blockquotes
+- Undo/redo functionality
+- Perfect for blogs, notes, and simple content
 
-### 📝 **Advanced Formatting**
-- **Heading Levels (H1-H6)** - Comprehensive heading hierarchy
-- **Font Controls** - Font family and size selection
-- **Advanced Colors** - Professional color picker with preset palette
-- **Superscript/Subscript** - Mathematical and scientific notation support
-- **Code Highlighting** - Syntax-highlighted code blocks
-- **Smart Typography** - Auto-formatting for quotes, dashes, and more
+### 🚀 **DeviNotionEditor** - Advanced & Professional
+- **Everything from Basic Editor, plus:**
+- Advanced formatting (superscript, subscript, highlighting)
+- Text colors and alignment
+- Tables with resizing capabilities
+- Image and link insertion
+- Code blocks with syntax highlighting
+- Bubble and floating menus
+- Fullscreen editing mode
+- Character counting and limits
+- Professional UI components
 
-### 🔧 **Professional Tools**
-- **Advanced Image Insertion** - URL, alt text, title, dimensions, and alignment options
-- **Smart Link Creation** - Link text, title, and target options
-- **Interactive Tables** - Visual table creation with preview and header options
-- **Flexible Toolbars** - Top, bottom, both, or no toolbar configurations
-- **Loading States** - Professional loading indicators
+### 🎨 **Universal Features**
+- Light and dark themes
+- Fully responsive design
+- Accessibility optimized
+- TypeScript support
+- Customizable styling
+- Keyboard shortcuts
+- Print-friendly
 
-## 🛠 Installation
+## 📦 Installation
 
 ```bash
 npm install devi-rce
 # or
 yarn add devi-rce
+# or
+pnpm add devi-rce
 ```
 
-## 📖 Basic Usage
+## 🎯 Quick Start
+
+### DeviBasicEditor - For Simple Content
 
 ```tsx
 import React, { useState } from 'react';
-import { RichTextEditor } from 'devi-rce';
+import { DeviBasicEditor } from 'devi-rce';
 
-function App() {
+function MyApp() {
   const [content, setContent] = useState('<p>Start writing...</p>');
 
   return (
-    <RichTextEditor 
+    <DeviBasicEditor
       content={content}
       onChange={setContent}
-      placeholder="Start typing to experience the professional editor..."
       theme="light"
-      height="400px"
+      height="300px"
+      placeholder="Write your content here..."
     />
   );
 }
 ```
 
-## 🎯 Professional Configuration
+### DeviNotionEditor - For Advanced Content
 
-### Full-Featured Editor
 ```tsx
-<RichTextEditor 
-  content={content}
-  onChange={setContent}
-  theme="light" // or "dark"
-  height="500px"
-  maxLength={5000}
-  autofocus={true}
-  tooltips={true}
-  enabledFeatures={{
-    basic: true,              // Bold, italic, underline, etc.
-    alignment: true,          // Text alignment options
-    lists: true,              // Bullet and numbered lists
-    colors: true,             // Color picker and highlighting  
-    media: true,              // Links and images
-    tables: true,             // Interactive tables
-    history: true,            // Undo/redo functionality
-    fonts: true,              // Font family and size
-    headings: true,           // H1-H6 heading levels
-    superscript: true,        // Superscript and subscript
-    bubbleMenu: true,         // Selection-based toolbar
-    floatingMenu: true,       // Empty line insertion menu
-    characterCount: true,     // Character counter
-    fullscreen: true,         // Fullscreen mode
-    codeHighlight: true       // Code block highlighting
-  }}
-  toolbar="top" // "top", "bottom", "both", or "none"
-  onFocus={() => console.log('Editor focused')}
-  onBlur={() => console.log('Editor blurred')}
-/>
+import React, { useState } from 'react';
+import { DeviNotionEditor } from 'devi-rce';
+
+function MyApp() {
+  const [content, setContent] = useState('');
+
+  return (
+    <DeviNotionEditor
+      content={content}
+      onChange={setContent}
+      theme="light"
+      height="500px"
+      placeholder="Type '/' for commands..."
+      enableBubbleMenu={true}
+      enableFloatingMenu={true}
+      showCharacterCount={true}
+    />
+  );
+}
 ```
 
-### Minimal Configuration
-```tsx
-<RichTextEditor 
-  content={content}
-  onChange={setContent}
-  placeholder="Simple editor for basic content..."
-  enabledFeatures={{
-    basic: true,
-    lists: true,
-    history: false,
-    // All other features disabled
-  }}
-  toolbar="bottom"
-  theme="light"
-/>
-```
+## 📚 API Documentation
 
-## 📋 Complete API Reference
-
-### Props
+### DeviBasicEditor Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `content` | `string` | `''` | HTML content of the editor |
-| `onChange` | `(content: string) => void` | `undefined` | Callback when content changes |
-| `placeholder` | `string` | `'Start typing...'` | Placeholder text |
+| `onChange` | `(content: string) => void` | - | Callback when content changes |
+| `placeholder` | `string` | `'Start writing...'` | Placeholder text |
+| `theme` | `'light' \| 'dark'` | `'light'` | Editor theme |
+| `height` | `string` | `'300px'` | Editor height |
 | `className` | `string` | `''` | Custom CSS class |
-| `readonly` | `boolean` | `false` | Make editor read-only |
-| `theme` | `'light' \| 'dark' \| 'auto'` | `'light'` | Editor theme |
-| `height` | `string` | `'auto'` | Editor height (CSS value) |
-| `maxLength` | `number` | `undefined` | Maximum character count |
-| `autofocus` | `boolean` | `false` | Auto-focus editor on mount |
-| `tooltips` | `boolean` | `true` | Show button tooltips |
-| `toolbar` | `'top' \| 'bottom' \| 'both' \| 'none'` | `'top'` | Toolbar position |
-| `onFocus` | `() => void` | `undefined` | Focus callback |
-| `onBlur` | `() => void` | `undefined` | Blur callback |
+| `readOnly` | `boolean` | `false` | Read-only mode |
+| `maxLength` | `number` | - | Maximum character limit |
 
-### Feature Configuration
+### DeviNotionEditor Props
 
-```tsx
-interface EnabledFeatures {
-  basic?: boolean;          // Bold, italic, underline, strikethrough, code
-  alignment?: boolean;      // Left, center, right, justify alignment
-  lists?: boolean;          // Bullet lists, numbered lists, blockquotes
-  colors?: boolean;         // Text color and highlighting
-  media?: boolean;          // Links and images
-  tables?: boolean;         // Table insertion and editing
-  history?: boolean;        // Undo/redo functionality
-  fonts?: boolean;          // Font family and size controls
-  headings?: boolean;       // H1-H6 heading levels
-  superscript?: boolean;    // Superscript and subscript
-  bubbleMenu?: boolean;     // Selection-based bubble menu
-  floatingMenu?: boolean;   // Empty line floating menu
-  characterCount?: boolean; // Character counter display
-  fullscreen?: boolean;     // Fullscreen editing mode
-  codeHighlight?: boolean;  // Syntax-highlighted code blocks
-}
-```
-
-## 🖱️ User Interactions
-
-### Keyboard Shortcuts
-- **Ctrl+B** - Bold text
-- **Ctrl+I** - Italic text
-- **Ctrl+U** - Underline text
-- **Ctrl+Z** - Undo
-- **Ctrl+Y** - Redo
-- **Escape** - Exit fullscreen mode
-
-### Smart Menus
-- **Bubble Menu** - Select text to see formatting options
-- **Floating Menu** - Click on empty lines to insert content
-
-### Professional Modals
-- **Link Dialog** - URL, text, title, and target options
-- **Image Dialog** - URL, alt text, dimensions, and alignment
-- **Table Dialog** - Rows, columns, headers, with live preview
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `content` | `string` | `''` | HTML content of the editor |
+| `onChange` | `(content: string) => void` | - | Callback when content changes |
+| `placeholder` | `string` | `'Type "/" for commands...'` | Placeholder text |
+| `theme` | `'light' \| 'dark'` | `'light'` | Editor theme |
+| `height` | `string` | `'400px'` | Editor height |
+| `className` | `string` | `''` | Custom CSS class |
+| `readOnly` | `boolean` | `false` | Read-only mode |
+| `maxLength` | `number` | - | Maximum character limit |
+| `showCharacterCount` | `boolean` | `true` | Show character/word count |
+| `enableSlashCommands` | `boolean` | `true` | Enable slash commands |
+| `enableBubbleMenu` | `boolean` | `true` | Enable bubble menu |
+| `enableFloatingMenu` | `boolean` | `true` | Enable floating menu |
+| `enableDragDrop` | `boolean` | `true` | Enable drag & drop |
 
 ## 🎨 Theming & Customization
 
-The editor uses CSS custom properties for extensive theming:
+### Built-in Themes
+
+```tsx
+// Light theme (default)
+<DeviNotionEditor theme="light" />
+
+// Dark theme
+<DeviNotionEditor theme="dark" />
+```
+
+### Custom Styling
+
+Override CSS variables for custom theming:
 
 ```css
 :root {
-  --rce-primary: #3b82f6;           /* Primary brand color */
-  --rce-bg-primary: #ffffff;        /* Main background */
-  --rce-bg-secondary: #f8fafc;      /* Secondary background */
-  --rce-text-primary: #111827;      /* Primary text */
-  --rce-border: #e5e7eb;            /* Border color */
-  /* ... and many more */
+  --devi-primary: #your-brand-color;
+  --devi-bg-primary: #your-background;
+  --devi-text-primary: #your-text-color;
+  --devi-border-primary: #your-border-color;
+}
+
+/* Dark theme overrides */
+.dark {
+  --devi-primary: #your-dark-brand-color;
+  --devi-bg-primary: #your-dark-background;
+  /* ... */
 }
 ```
 
-## 📚 Examples
+### Custom CSS Classes
 
-Check out the example files:
-- `examples/BasicExample.tsx` - Full-featured editor showcase
-- `examples/CustomFeaturesExample.tsx` - Different configuration examples
+```tsx
+<DeviNotionEditor 
+  className="my-custom-editor"
+  // ... other props
+/>
+```
+
+## 🔧 Advanced Usage
+
+### Controlled vs Uncontrolled
+
+```tsx
+// Controlled (recommended)
+const [content, setContent] = useState('');
+<DeviNotionEditor content={content} onChange={setContent} />
+
+// Uncontrolled
+<DeviNotionEditor defaultContent="<p>Initial content</p>" />
+```
+
+### Character Limits
+
+```tsx
+<DeviNotionEditor
+  maxLength={5000}
+  showCharacterCount={true}
+  // Will show "1250 / 5000" in status bar
+/>
+```
+
+### Read-only Mode
+
+```tsx
+<DeviNotionEditor
+  readOnly={true}
+  // Perfect for displaying formatted content
+/>
+```
+
+### Menu Configuration
+
+```tsx
+<DeviNotionEditor
+  enableBubbleMenu={true}      // Show formatting menu on text selection
+  enableFloatingMenu={true}    // Show "+" menu on empty lines
+  enableSlashCommands={true}   // Enable "/" commands
+  enableDragDrop={true}        // Enable drag & drop
+/>
+```
+
+## 🛠️ Use Cases
+
+### 📝 DeviBasicEditor is perfect for:
+- Blog post writing
+- Comment systems
+- Simple note-taking
+- Basic content forms
+- Documentation with minimal formatting
+
+### 🚀 DeviNotionEditor is ideal for:
+- Content management systems
+- Documentation platforms
+- Collaborative writing tools
+- Rich note-taking applications
+- Professional content creation
+- Knowledge bases
+- Wiki systems
+
+## 🔄 Migration Guide
+
+### From Legacy RichTextEditor
+
+```tsx
+// Old way (still works)
+import { RichTextEditor } from 'devi-rce';
+
+// New way - choose the right editor
+import { DeviBasicEditor, DeviNotionEditor } from 'devi-rce';
+
+// Use DeviBasicEditor for simple use cases
+<DeviBasicEditor {...props} />
+
+// Use DeviNotionEditor for advanced features
+<DeviNotionEditor {...props} />
+```
+
+## 📱 Responsive Design
+
+Both editors are fully responsive and work great on:
+- Desktop computers
+- Tablets
+- Mobile phones
+- Touch devices
+
+The toolbar automatically adapts to smaller screens with:
+- Collapsible toolbar sections
+- Touch-friendly buttons
+- Optimized spacing
+- Mobile-specific interactions
+
+## ♿ Accessibility
+
+- Full keyboard navigation support
+- Screen reader compatibility
+- High contrast mode support
+- Focus management
+- ARIA labels and roles
+- Reduced motion support
+
+## 🎹 Keyboard Shortcuts
+
+| Action | Shortcut |
+|--------|----------|
+| Bold | `Ctrl/Cmd + B` |
+| Italic | `Ctrl/Cmd + I` |
+| Underline | `Ctrl/Cmd + U` |
+| Strikethrough | `Ctrl/Cmd + Shift + S` |
+| Undo | `Ctrl/Cmd + Z` |
+| Redo | `Ctrl/Cmd + Y` |
+| Heading 1 | `Ctrl/Cmd + Alt + 1` |
+| Heading 2 | `Ctrl/Cmd + Alt + 2` |
+| Bullet List | `Ctrl/Cmd + Shift + 8` |
+| Numbered List | `Ctrl/Cmd + Shift + 7` |
+
+## 📊 Performance
+
+- **Lightweight**: Optimized bundle size
+- **Fast**: Efficient rendering with React
+- **Memory efficient**: Proper cleanup and disposal
+- **Lazy loading**: Extensions loaded on demand
+- **Tree shaking**: Only import what you use
+
+## 🔍 Examples
+
+Check out our comprehensive examples:
+
+- [`DeviBasicEditorExample.tsx`](./examples/DeviBasicEditorExample.tsx) - Simple editor showcase
+- [`DeviNotionEditorExample.tsx`](./examples/DeviNotionEditorExample.tsx) - Advanced editor features
+- [`BasicExample.tsx`](./examples/BasicExample.tsx) - Legacy example
+- [`CustomFeaturesExample.tsx`](./examples/CustomFeaturesExample.tsx) - Feature customization
 
 ## 🤝 Contributing
 
-We welcome contributions! Please feel free to submit a Pull Request.
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Code of conduct
+- Development setup
+- Pull request process
+- Issue reporting
+
+## 🐛 Issues & Support
+
+- **Bug Reports**: [GitHub Issues](https://github.com/your-repo/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/your-repo/discussions)
+- **Documentation**: This README and inline comments
 
 ## 📄 License
 
-MIT © [Akash Kumar Singh](https://github.com/webakash1806)
+MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [TipTap](https://tiptap.dev/) - The headless editor framework
+- Styled with [Tailwind CSS](https://tailwindcss.com/) principles
+- Icons by [Lucide React](https://lucide.dev/)
+- Inspired by [Notion](https://notion.so) and [Linear](https://linear.app)
+
+## 📈 Changelog
+
+### v2.0.0 (Latest)
+- ✨ **NEW**: `DeviBasicEditor` for simple use cases
+- ✨ **NEW**: `DeviNotionEditor` for advanced features  
+- 🎨 Complete UI/UX redesign
+- 🔧 Full TypeScript rewrite
+- 📱 Enhanced mobile responsiveness
+- ♿ Improved accessibility
+- 🚀 Performance optimizations
+- 📊 Character counting and limits
+- 🎨 Advanced theming system
+
+### v1.0.1
+- 🐛 Bug fixes and stability improvements
+- 📝 Documentation updates
+
+### v1.0.0
+- 🎉 Initial release with basic rich text editing
 
 ---
 
-**Transform your content creation experience with this professional Rich Text Editor!** 🚀
+<div align="center">
+  <strong>Made with ❤️ for the React community</strong>
+  <br>
+  <sub>Star ⭐ this repo if you find it useful!</sub>
+</div>

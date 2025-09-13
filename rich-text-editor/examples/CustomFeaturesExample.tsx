@@ -84,12 +84,9 @@ const CustomFeaturesExample: React.FC = () => {
                 history: true,
                 fonts: false,
                 headings: false,
-                superscript: false,
                 bubbleMenu: true,
                 floatingMenu: false,
-                characterCount: false,
-                fullscreen: false,
-                codeHighlight: false
+                fullscreen: false
               }}
             />
           </div>
@@ -139,12 +136,9 @@ const CustomFeaturesExample: React.FC = () => {
                 history: true,
                 fonts: true,
                 headings: true,
-                superscript: true,
                 bubbleMenu: true,
                 floatingMenu: true,
-                characterCount: true,
-                fullscreen: true,
-                codeHighlight: false
+                fullscreen: true
               }}
             />
           </div>
@@ -194,12 +188,9 @@ const CustomFeaturesExample: React.FC = () => {
                 history: false,
                 fonts: false,
                 headings: true,
-                superscript: false,
                 bubbleMenu: false,
                 floatingMenu: true,
-                characterCount: false,
-                fullscreen: false,
-                codeHighlight: false
+                fullscreen: false
               }}
             />
           </div>
@@ -255,12 +246,9 @@ const CustomFeaturesExample: React.FC = () => {
                     ['Colors & Highlighting', '❌', '✅', '❌'],
                     ['Links & Images', '❌', '✅', '❌'],
                     ['Tables', '❌', '✅', '❌'],
-                    ['Code Blocks', '❌', '❌', '❌'],
-                    ['Superscript/Subscript', '❌', '✅', '❌'],
                     ['Undo/Redo History', '✅', '✅', '❌'],
                     ['Bubble Menu', '✅', '✅', '❌'],
                     ['Floating Menu', '❌', '✅', '✅'],
-                    ['Character Count', '❌', '✅', '❌'],
                     ['Fullscreen Mode', '❌', '✅', '❌'],
                     ['Toolbar Position', 'Top', 'Top', 'Bottom'],
                   ].map(([feature, basic, advanced, minimal], index) => (

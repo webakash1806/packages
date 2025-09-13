@@ -13,13 +13,6 @@ import TextStyle from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import FontFamily from '@tiptap/extension-font-family';
-import FontSize from '@tiptap/extension-font-size';
-import Placeholder from '@tiptap/extension-placeholder';
-import CharacterCount from '@tiptap/extension-character-count';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import Typography from '@tiptap/extension-typography';
-import Superscript from '@tiptap/extension-superscript';
-import Subscript from '@tiptap/extension-subscript';
 import {
   Bold,
   Italic,
@@ -47,7 +40,6 @@ import {
   Heading4,
   Heading5,
   Heading6,
-  TextSize,
   Plus,
   Minus,
   Check,
@@ -57,8 +49,6 @@ import {
   Minimize2,
   ExternalLink,
   FileCode,
-  Superscript as SuperscriptIcon,
-  Subscript as SubscriptIcon,
   HelpCircle,
   Settings,
   Copy,
@@ -85,12 +75,9 @@ export interface RichTextEditorProps {
     history?: boolean;
     fonts?: boolean;
     headings?: boolean;
-    superscript?: boolean;
     bubbleMenu?: boolean;
     floatingMenu?: boolean;
-    characterCount?: boolean;
     fullscreen?: boolean;
-    codeHighlight?: boolean;
   };
   toolbar?: 'top' | 'bottom' | 'both' | 'none';
   onBlur?: () => void;
@@ -106,7 +93,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = 'Start typing...',
   className = '',
   readonly = false,
-  maxLength,
   theme = 'light',
   enabledFeatures = {
     basic: true,
@@ -118,12 +104,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     history: true,
     fonts: false,
     headings: true,
-    superscript: true,
     bubbleMenu: true,
     floatingMenu: true,
-    characterCount: true,
-    fullscreen: true,
-    codeHighlight: true
+    fullscreen: true
   },
   toolbar = 'top',
   onBlur,
@@ -165,22 +148,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         keepMarks: true,
         keepAttributes: false,
       },
-      code: enabledFeatures.codeHighlight ? false : {},
     }),
-    Placeholder.configure({
-      placeholder,
-      emptyEditorClass: 'is-editor-empty',
-    }),
-    Typography,
   ];
-
-  if (enabledFeatures.characterCount && maxLength) {
-    extensions.push(
-      CharacterCount.configure({
-        limit: maxLength,
-      })
-    );
-  }
 
   if (enabledFeatures.basic) {
     extensions.push(Underline);
@@ -255,23 +224,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     extensions.push(
       FontFamily.configure({
         types: ['textStyle'],
-      }),
-      FontSize.configure({
-        types: ['textStyle'],
-      })
-    );
-  }
-  
-  if (enabledFeatures.superscript) {
-    extensions.push(Superscript, Subscript);
-  }
-  
-  if (enabledFeatures.codeHighlight) {
-    extensions.push(
-      CodeBlockLowlight.configure({
-        HTMLAttributes: {
-          class: 'rce-code-block',
-        },
       })
     );
   }
@@ -439,10 +391,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setIsFullscreen(prev => !prev);
   }, []);
   
-  // Font size handler
+  // Font size handler - disabled for now
   const setFontSize = useCallback((size: string) => {
     if (!editor) return;
-    editor.chain().focus().setFontSize(size).run();
+    // Font size not available in current setup
     closeAllDialogs();
   }, [editor]);
   
@@ -454,7 +406,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [editor]);
   
   // Heading handler
-  const setHeading = useCallback((level: number) => {
+  const setHeading = useCallback((level: 1 | 2 | 3 | 4 | 5 | 6) => {
     if (!editor) return;
     editor.chain().focus().toggleHeading({ level }).run();
     closeAllDialogs();
@@ -634,20 +586,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     </div>
   );
 
-  // Character count renderer
+  // Character count renderer - disabled for now
   const CharacterCounter = () => {
-    if (!enabledFeatures.characterCount || !maxLength || !editor) return null;
-    
-    const count = editor.storage.characterCount.characters();
-    const percentage = Math.round((count / maxLength) * 100);
-    const isWarning = percentage >= 80 && percentage < 100;
-    const isError = percentage >= 100;
-    
-    return (
-      <div className={`rce-character-count ${isWarning ? 'rce-character-count-warning' : ''} ${isError ? 'rce-character-count-error' : ''}`}>
-        {count}/{maxLength} characters ({percentage}%)
-      </div>
-    );
+    return null; // Character counting disabled
   };
 
   return (
@@ -777,7 +718,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     <button 
                       key={level} 
                       className={`rce-dropdown-item ${editor.isActive('heading', { level }) ? 'rce-dropdown-item-active' : ''}`} 
-                      onClick={() => setHeading(level)}
+                      onClick={() => setHeading(level as 1 | 2 | 3 | 4 | 5 | 6)}
                     >
                       <span className="rce-dropdown-item-icon"><HeadingIcon size={16} /></span>
                       <span className="rce-dropdown-item-text">Heading {level}</span>
@@ -810,22 +751,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 ))}
               </ToolbarDropdown>
 
-              <ToolbarDropdown
-                toggle={() => toggleDropdown('fontSize')}
-                isOpen={activeDropdown === 'fontSize'}
-                title="Font size"
-                icon={<TextSize size={16} />}
-              >
-                {fontSizes.map(size => (
-                  <button 
-                    key={size} 
-                    className={`rce-dropdown-item ${editor.isActive('textStyle', { fontSize: size }) ? 'rce-dropdown-item-active' : ''}`} 
-                    onClick={() => setFontSize(size)}
-                  >
-                    <span className="rce-dropdown-item-text" style={{ fontSize: size }}>{size}</span>
-                  </button>
-                ))}
-              </ToolbarDropdown>
             </div>
           )}
 
@@ -861,24 +786,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 <Strikethrough size={16} />
               </ToolbarButton>
               
-              {enabledFeatures.superscript && (
-                <>
-                  <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleSuperscript().run()}
-                    isActive={editor.isActive('superscript')}
-                    title="Superscript"
-                  >
-                    <SuperscriptIcon size={16} />
-                  </ToolbarButton>
-                  <ToolbarButton
-                    onClick={() => editor.chain().focus().toggleSubscript().run()}
-                    isActive={editor.isActive('subscript')}
-                    title="Subscript"
-                  >
-                    <SubscriptIcon size={16} />
-                  </ToolbarButton>
-                </>
-              )}
               
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleCode().run()}
@@ -1046,15 +953,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   <TableIcon size={16} />
                 </ToolbarButton>
               )}
-              {enabledFeatures.codeHighlight && (
-                <ToolbarButton
-                  onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                  isActive={editor.isActive('codeBlock')}
-                  title="Code Block"
-                >
-                  <FileCode size={16} />
-                </ToolbarButton>
-              )}
             </div>
           )}
 
@@ -1100,7 +998,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           className="rce-editor-area"
         />
         
-        {enabledFeatures.characterCount && <CharacterCounter />}
       </div>
       
       {/* Bottom Toolbar (if enabled) */}
@@ -1165,7 +1062,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           
           <div className="rce-toolbar-spacer"></div>
           
-          {enabledFeatures.characterCount && <CharacterCounter />}
         </div>
       )}
 

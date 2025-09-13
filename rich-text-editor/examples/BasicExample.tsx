@@ -113,12 +113,9 @@ const BasicExample: React.FC = () => {
                 history: true,
                 fonts: true,
                 headings: true,
-                superscript: true,
                 bubbleMenu: true,
                 floatingMenu: true,
-                characterCount: true,
-                fullscreen: true,
-                codeHighlight: true
+                fullscreen: true
               }}
             />
           </div>
@@ -173,11 +170,9 @@ const BasicExample: React.FC = () => {
               '✅ Colors & Highlighting',
               '✅ Links & Images with Advanced Options',
               '✅ Tables with Preview',
-              '✅ Code Blocks & Inline Code',
-              '✅ Superscript & Subscript',
+              '✅ Inline Code',
               '✅ Undo/Redo History',
               '✅ Fullscreen Mode',
-              '✅ Character Count (5000 limit)',
               '✅ Bubble Menu (Selection-based)',
               '✅ Floating Menu (Empty line)',
               '✅ Professional Modals',
