@@ -7,6 +7,12 @@ on:
       - 'rich-text-editor/**'  # Only run when files in rich-text-editor folder change
   workflow_dispatch:
 
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  issues: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -109,10 +115,8 @@ jobs:
         
     - name: Push version bump
       if: steps.version.outputs.version_bumped == 'true'
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}
+      run: |
+        git push origin HEAD:${{ github.ref_name }}
         
     - name: Publish to NPM
       run: |
