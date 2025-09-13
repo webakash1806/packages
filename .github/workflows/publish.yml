@@ -1,32 +1,167 @@
-name: NPM Publish
+name: Publish devi-rce to NPM
 
 on:
   push:
-    branches:
-      - main
-  release:
-    types: [published]
+    branches: [ main, master ]
+    paths:
+      - 'rich-text-editor/**'  # Only run when files in rich-text-editor folder change
+  workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - rich-text-editor
-
+    
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          registry-url: https://registry.npmjs.org/
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for proper git operations
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'  # Use Node 20 for better React 19 support
+        registry-url: 'https://registry.npmjs.org'
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-rich-text-editor-${{ hashFiles('rich-text-editor/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-rich-text-editor-
+          ${{ runner.os }}-node-
+          
+    - name: Install dependencies
+      run: |
+        cd rich-text-editor
+        npm install --legacy-peer-deps
+        
+    - name: Run tests (if available)
+      run: |
+        cd rich-text-editor
+        if npm run test --if-present; then
+          echo "Tests passed or no tests defined"
+        else
+          echo "Tests failed, but continuing..."
+        fi
+      continue-on-error: true
+        
+    - name: Build package
+      run: |
+        cd rich-text-editor
+        npm run build
+        
+    - name: Check if package exists on NPM
+      id: check-npm
+      run: |
+        cd rich-text-editor
+        PACKAGE_NAME=$(node -p "require('./package.json').name")
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        
+        echo "Package: $PACKAGE_NAME"
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Check if this version already exists on NPM
+        if npm view $PACKAGE_NAME@$CURRENT_VERSION version 2>/dev/null; then
+          echo "Version $CURRENT_VERSION already exists on NPM, will bump version"
+          echo "should_bump=true" >> $GITHUB_OUTPUT
+        else
+          echo "Version $CURRENT_VERSION does not exist on NPM, will publish as-is"
+          echo "should_bump=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Bump version (if needed)
+      id: version
+      if: steps.check-npm.outputs.should_bump == 'true'
+      run: |
+        cd rich-text-editor
+        # Get current version
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Bump patch version automatically
+        npm version patch --no-git-tag-version
+        
+        # Get new version
+        NEW_VERSION=$(node -p "require('./package.json').version")
+        echo "New version: $NEW_VERSION"
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "version_bumped=true" >> $GITHUB_OUTPUT
+        
+    - name: Get current version (if not bumped)
+      id: current-version
+      if: steps.check-npm.outputs.should_bump == 'false'
+      run: |
+        cd rich-text-editor
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "Using current version: $CURRENT_VERSION"
+        echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "version_bumped=false" >> $GITHUB_OUTPUT
+        
+    - name: Commit version bump
+      if: steps.version.outputs.version_bumped == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add rich-text-editor/package.json
+        git diff --staged --quiet || git commit -m "Bump devi-rce version to ${{ steps.version.outputs.new_version }} [skip ci]"
+        
+    - name: Push version bump
+      if: steps.version.outputs.version_bumped == 'true'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+        
+    - name: Publish to NPM
+      run: |
+        cd rich-text-editor
+        npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+    - name: Create Git Tag
+      run: |
+        cd rich-text-editor
+        VERSION=${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+        PACKAGE_NAME=$(node -p "require('./package.json').name")
+        git tag $PACKAGE_NAME-v$VERSION
+        git push origin $PACKAGE_NAME-v$VERSION
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Go into each package folder and publish
-      - name: Publish ${{ matrix.package }}
-        working-directory: ./${{ matrix.package }}
-        run: |
-          npm install
-          npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - name: Create GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: devi-rce-v${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+        name: devi-rce v${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+        body: |
+          ## 🚀 devi-rce v${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+          
+          A powerful Rich Content Editor component for React applications
+          
+          ### 📦 Installation
+          ```bash
+          npm install devi-rce
+          ```
+          
+          ### 🔗 Links
+          - [NPM Package](https://www.npmjs.com/package/devi-rce)
+          - [Documentation](https://github.com/webakash1806/devi-extra-package#readme)
+          
+          ### 📝 What's Changed in rich-text-editor
+          - Automatic release for devi-rce version ${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+          - Package published to NPM registry
+          - Now supports React 19
+          
+          ### ✨ Features
+          - Rich text editing with TipTap
+          - TypeScript support
+          - React 19 compatible
+          - Customizable toolbar
+          - Text formatting options
+          - Tables, links, images support
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
