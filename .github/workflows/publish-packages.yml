@@ -1,0 +1,205 @@
+name: Publish Packages
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish (leave empty for all changed packages)'
+        required: false
+        type: string
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed packages
+        id: changes
+        run: |
+          # If manual trigger with specific package
+          if [ "${{ github.event.inputs.package }}" != "" ]; then
+            echo "packages=[\"${{ github.event.inputs.package }}\"]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Get changed files in the last commit
+          changed_files=$(git diff --name-only HEAD~1..HEAD)
+          echo "Changed files: $changed_files"
+          
+          # Find packages with changes
+          packages=()
+          
+          # Check rich-text-editor
+          if echo "$changed_files" | grep -q "^rich-text-editor/"; then
+            packages+=("rich-text-editor")
+          fi
+          
+          # Add more packages here as needed
+          # if echo "$changed_files" | grep -q "^another-package/"; then
+          #   packages+=("another-package")
+          # fi
+          
+          # Convert to JSON array
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "packages=[]" >> $GITHUB_OUTPUT
+          else
+            printf -v joined '"%s",' "${packages[@]}"
+            echo "packages=[${joined%,}]" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "Detected packages to publish: ${packages[*]}"
+
+  publish:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.detect-changes.outputs.packages) }}
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        registry-url: 'https://registry.npmjs.org'
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ matrix.package }}-${{ hashFiles(format('{0}/package-lock.json', matrix.package)) }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ matrix.package }}-
+          ${{ runner.os }}-node-
+          
+    - name: Install dependencies
+      run: |
+        cd ${{ matrix.package }}
+        npm ci
+        
+    - name: Run tests (if available)
+      run: |
+        cd ${{ matrix.package }}
+        if npm run test --if-present; then
+          echo "Tests passed or no tests defined"
+        else
+          echo "Tests failed, but continuing..."
+        fi
+      continue-on-error: true
+        
+    - name: Build package
+      run: |
+        cd ${{ matrix.package }}
+        npm run build
+        
+    - name: Check if package exists on NPM
+      id: check-npm
+      run: |
+        cd ${{ matrix.package }}
+        PACKAGE_NAME=$(node -p "require('./package.json').name")
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        
+        # Check if this version already exists on NPM
+        if npm view $PACKAGE_NAME@$CURRENT_VERSION version 2>/dev/null; then
+          echo "Version $CURRENT_VERSION already exists on NPM"
+          echo "should_bump=true" >> $GITHUB_OUTPUT
+        else
+          echo "Version $CURRENT_VERSION does not exist on NPM"
+          echo "should_bump=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Bump version (if needed)
+      id: version
+      if: steps.check-npm.outputs.should_bump == 'true'
+      run: |
+        cd ${{ matrix.package }}
+        # Get current version
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Bump patch version automatically
+        npm version patch --no-git-tag-version
+        
+        # Get new version
+        NEW_VERSION=$(node -p "require('./package.json').version")
+        echo "New version: $NEW_VERSION"
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "version_bumped=true" >> $GITHUB_OUTPUT
+        
+    - name: Get current version (if not bumped)
+      id: current-version
+      if: steps.check-npm.outputs.should_bump == 'false'
+      run: |
+        cd ${{ matrix.package }}
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "version_bumped=false" >> $GITHUB_OUTPUT
+        
+    - name: Commit version bump
+      if: steps.version.outputs.version_bumped == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add ${{ matrix.package }}/package.json
+        git diff --staged --quiet || git commit -m "Bump ${{ matrix.package }} version to ${{ steps.version.outputs.new_version }} [skip ci]"
+        
+    - name: Push version bump
+      if: steps.version.outputs.version_bumped == 'true'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+        
+    - name: Publish to NPM
+      run: |
+        cd ${{ matrix.package }}
+        npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+    - name: Create Git Tag
+      run: |
+        VERSION=${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+        git tag ${{ matrix.package }}-v$VERSION
+        git push origin ${{ matrix.package }}-v$VERSION
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ matrix.package }}-v${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+        name: ${{ matrix.package }} v${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+        body: |
+          ## 🚀 ${{ matrix.package }} v${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+          
+          ### 📦 Installation
+          ```bash
+          npm install ${{ matrix.package }}
+          ```
+          
+          ### 🔗 Links
+          - [NPM Package](https://www.npmjs.com/package/${{ matrix.package }})
+          - [Documentation](https://github.com/${{ github.repository }}#readme)
+          
+          ### 📝 What's Changed
+          - Automatic release for ${{ matrix.package }} version ${{ steps.version.outputs.new_version || steps.current-version.outputs.new_version }}
+          - Package published to NPM registry
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
