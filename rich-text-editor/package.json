@@ -1,6 +1,6 @@
 {
   "name": "devi-rce",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A powerful Rich Content Editor component for React applications",
   "type": "module",
   "main": "dist/index.js",
